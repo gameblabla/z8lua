@@ -766,10 +766,14 @@ void luaV_execute (lua_State *L) {
       )
       vmcase(OP_FORLOOP,
         lua_Number step = nvalue(ra+2);
-        lua_Number idx = luai_numadd(L, nvalue(ra), step); /* increment index */
         lua_Number limit = nvalue(ra+1);
-        if (luai_numlt(L, 0, step) ? luai_numle(L, idx, limit)
-                                   : luai_numle(L, limit, idx)) {
+		lua_Number orgidx = nvalue(ra);
+        lua_Number idx = luai_numadd(L, orgidx, step); /* increment index */		
+
+		bool posstep = luai_numlt(L, 0, step);  // check for idx over/underflow - that will be end of loop. 
+		bool overflow = posstep ? luai_numlt(L, idx, orgidx) : luai_numlt(L, orgidx, idx);
+		
+        if (!overflow && (posstep ? luai_numle(L, idx, limit) : luai_numle(L, limit, idx))) {
           ci->u.l.savedpc += GETARG_sBx(i);  /* jump back */
           setnvalue(ra, idx);  /* update internal index... */
           setnvalue(ra+3, idx);  /* ...and external index */
