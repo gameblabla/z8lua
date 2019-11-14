@@ -25,7 +25,7 @@ struct fix32
 
     /* Convert from/to double */
     inline fix32(double d)
-      : m_bits((int32_t)std::round(d * 65536.0))
+      : m_bits((int32_t)std::floor(d * 65536.0))
     {}
 
     inline operator double() const
